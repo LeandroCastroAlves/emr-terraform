@@ -38,3 +38,35 @@ resource "aws_iam_instance_profile" "emr_profile" {
   name = "EMR_EC2_InstanceProfile"
   role = aws_iam_role.emr_ec2_role.name
 }
+
+resource "aws_iam_policy" "emr_s3_access" {
+  name = "EMR_S3_Access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::data-spark-sor",
+          "arn:aws:s3:::aws-glue-assets-314146324926-us-east-1/scripts/"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::data-spark-sor/*",
+          "arn:aws:s3:::aws-glue-assets-314146324926-us-east-1/scripts/*"
+        ]
+      }
+    ]
+  })
+}

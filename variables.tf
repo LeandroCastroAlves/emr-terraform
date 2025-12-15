@@ -1,5 +1,5 @@
 variable "cluster_name" {
-  default = "emr-treino"
+  default = "emr-cluster-ec2"
 }
 
 variable "log_bucket" {
