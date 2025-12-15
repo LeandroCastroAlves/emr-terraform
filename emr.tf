@@ -1,7 +1,9 @@
+
+
 resource "aws_emr_cluster" "this" {
-  name          = var.cluster_name
+  name          = "emr-spark-clientes"
   release_label = "emr-6.15.0"
-  applications  = ["Spark", "Hadoop"]
+  applications  = ["Spark"]
 
   log_uri = "s3://${var.log_bucket}/emr-logs/"
 
@@ -9,6 +11,7 @@ resource "aws_emr_cluster" "this" {
 
   ec2_attributes {
     instance_profile = aws_iam_instance_profile.emr_profile.arn
+    subnet_id        = data.aws_subnets.default.ids[0]
   }
 
   master_instance_group {
@@ -21,8 +24,23 @@ resource "aws_emr_cluster" "this" {
     instance_count = 2
   }
 
+  ### 👇 STEP SPARK
+  step {
+    name              = "spark-clientes-job"
+    action_on_failure = "TERMINATE_CLUSTER"
+
+    hadoop_jar_step {
+      jar  = "command-runner.jar"
+      args = [
+        "spark-submit",
+        "--deploy-mode", "cluster",
+        "s3://aws-glue-assets-314146324926-us-east-1/scripts/job-cli.py",
+      ]
+    }
+  }
+
   termination_protection = false
-  keep_job_flow_alive_when_no_steps = true
+  keep_job_flow_alive_when_no_steps = false
 
 }
 
